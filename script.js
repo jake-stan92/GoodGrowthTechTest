@@ -1,19 +1,22 @@
-const API_KEY = "";
-const pageBody = document.querySelector(".kOBmMQ");
-const coordURL = document.getElementById("propertyViewOnGoogleMaps_image").href;
+const API_KEY = ""; //https://www.weatherapi.com/
+const parentElement = document.querySelector(".kOBmMQ"); // parent element to append to
+const coordURL = document.getElementById("propertyViewOnGoogleMaps_image").href; // a tag containing coordinates
 let weatherData = {};
 
+// format co-ordinates taken from a tag url
 function formatCoords(url) {
   const coords = url.split("destination=").pop();
   const formattedCoords = coords.replace("%2C", ",");
   return formattedCoords;
 }
 
+// API call to get weather data
 async function getWeather(location) {
   let data;
   let response = await fetch(
     `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${location}`
   );
+
   if (response.ok) {
     data = await response.json();
   } else {
@@ -21,6 +24,7 @@ async function getWeather(location) {
     response = await fetch(
       `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${window.globalDataLayer.propertySubRegion}`
     );
+
     data = await response.json();
   }
   weatherData = {
@@ -33,12 +37,16 @@ async function getWeather(location) {
   };
 }
 
+// display weather on page
 function displayWeather() {
+  // check if weather data is populated
   if (Object.keys(weatherData).length != 0) {
     // create div to house weather data
     const weatherDiv = document.createElement("div");
+
     // set new div classname
     weatherDiv.setAttribute("class", "weatherDiv");
+
     // set CSS
     weatherDiv.style.cssText = `
       width: 100%;
@@ -50,6 +58,7 @@ function displayWeather() {
     weatherDivLeft.style.cssText = `
       flex: 1;
       `;
+
     const weatherDivRight = document.createElement("div");
     weatherDivRight.style.cssText = `
       flex: 1;
@@ -119,13 +128,20 @@ function displayWeather() {
     weatherDiv.appendChild(weatherDivRight);
 
     // append main div to doc
-    pageBody.appendChild(weatherDiv);
+    parentElement.appendChild(weatherDiv);
   } else {
-    // create error p
+    // create error p if weatherData not populated
     const errorText = document.createElement("p");
     errorText.textContent = "Error Getting Weather Data";
 
     //append error div
-    pageBody.appendChild(errorText);
+    parentElement.appendChild(errorText);
   }
 }
+
+async function getData() {
+  await getWeather(formatCoords(coordURL));
+  displayWeather();
+}
+
+getData();
